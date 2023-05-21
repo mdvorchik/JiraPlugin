@@ -1,0 +1,55 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+    </plugin-info>
+
+    <!-- add our i18n resource -->
+    <resource type="i18n" name="i18n" location="new-listener-plugin"/>
+    
+    <!-- add our web resources -->
+    <servlet name="Hello World Servlet" key="helloWorld" class="com.example.tutorial.plugins.ConfigServlet">
+        <description>Says Hello World, Australia or your name.</description>
+        <url-pattern>/helloworld</url-pattern>
+        <init-param>
+            <param-name>defaultName</param-name>
+            <param-value>Australia</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet name="Property Servlet" i18n-name-key="property-servlet.name" key="property-servlet" class="com.example.tutorial.plugins.PropertyServlet">
+        <description key="property-servlet.description">The Property Servlet</description>
+        <url-pattern>/property</url-pattern>
+    </servlet>
+
+    <web-item key="user-property-form-link" name="User Property Form Link" section="system.top.navigation.bar" weight="1000">
+        <label key="Add User Property"/>
+        <link>/secure/UserPropertyFormAction!default.jspa</link>
+    </web-item>
+
+    <webwork1 key="user-property-form" name="User Property Form" class="java.lang.Object">
+        <actions>
+            <action name="com.example.tutorial.plugins.UserPropertyFormAction" alias="UserPropertyFormAction">
+                <view name="input">/templates/user-property-form.vm</view>
+                <view name="success">/templates/user-property-form-success.vm</view>
+            </action>
+        </actions>
+    </webwork1>
+
+
+
+    <!--    <ao key="ao" name="Your Plugin Active Objects" schemaVersion="1">-->
+<!--        <description>The module configuring the Active Objects service</description>-->
+<!--        <entity name="UserProperty">-->
+<!--            <description>A UserProperty entity</description>-->
+<!--            <attribute name="userName" type="string"/>-->
+<!--            <attribute name="propertyName" type="string"/>-->
+<!--            <attribute name="propertyValue" type="string"/>-->
+<!--        </entity>-->
+<!--    </ao>-->
+
+
+</atlassian-plugin>

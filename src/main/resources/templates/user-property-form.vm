@@ -1,0 +1,12 @@
+<form action="UserPropertyFormAction.jspa" method="post">
+    <label for="user">User</label>
+    <input id="user" name="user" type="text">
+
+    <label for="name">Name</label>
+    <input id="name" name="name" type="text">
+
+    <label for="value">Value</label>
+    <input id="value" name="value" type="text">
+
+    <button type="submit">Add Property</button>
+</form>
