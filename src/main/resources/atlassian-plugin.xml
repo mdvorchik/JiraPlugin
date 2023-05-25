@@ -25,8 +25,13 @@
         <url-pattern>/property</url-pattern>
     </servlet>
 
+    <web-item key="general-settings" name="User Properties Link" section="system.top.navigation.bar" weight="1000">
+        <label key="General settings"/>
+        <link>/secure/UserPropertiesAction!default.jspa</link>
+    </web-item>
+
     <web-item key="user-property-form-link" name="User Property Form Link" section="system.top.navigation.bar" weight="1000">
-        <label key="Add User Property"/>
+        <label key="Neo4j creds"/>
         <link>/secure/UserPropertyFormAction!default.jspa</link>
     </web-item>
 
@@ -38,6 +43,29 @@
             </action>
         </actions>
     </webwork1>
+
+    <web-item key="user-properties-link" name="User Properties Link" section="system.top.navigation.bar" weight="1000">
+        <label key="Edit Rules Settings"/>
+        <link>/secure/UserPropertiesAction!default.jspa</link>
+    </web-item>
+
+    <web-item key="init-status" name="User Properties Link" section="system.top.navigation.bar" weight="1000">
+        <label key="Init/Dq status"/>
+        <link>/secure/UserPropertiesAction!default.jspa</link>
+    </web-item>
+
+
+
+    <webwork1 key="user-properties-action" name="User Properties Action" class="com.example.tutorial.plugins.UserPropertiesAction">
+        <actions>
+            <action name="com.example.tutorial.plugins.UserPropertiesAction" alias="UserPropertiesAction">
+                <view name="input">/templates/user-properties.vm</view>
+                <view name="success">/templates/user-properties.vm</view>
+<!--                <view name="success">/secure/UserPropertyFormAction!default.jspa</view>-->
+            </action>
+        </actions>
+    </webwork1>
+
 
 
 

@@ -1,0 +1,22 @@
+{
+  "entities": [
+    {
+      "name": "entity_name",
+      "type": "type_name",
+      "nodes": [
+        {
+          "name": "field_name",
+          "field_type": "field_type_name"
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "source_entity/node_name",
+          "target_entity": "target_entity/node_name",
+          "relation_type": "relation_name",
+          "is_directed": true
+        }
+      ]
+    }
+  ]
+}

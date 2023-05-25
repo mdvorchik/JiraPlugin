@@ -1,0 +1,58 @@
+{
+  "entities": [
+    {
+      "type": "Issue",
+      "nodes": [
+        {
+          "name": "BusinessInfo",
+          "field_type": "drop-down"
+        },
+        {
+          "name": "Subtype",
+          "field_type": "drop-down"
+        },
+        {
+          "name": "Author",
+          "field_type": "User"
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "this",
+          "target_entity": "BusinessInfo",
+          "relation_type": "belongs_to",
+          "is_directed": false
+        },
+        {
+          "source_entity": "Subtype",
+          "target_entity": "this",
+          "relation_type": "belongs_to",
+          "is_directed": true
+        },
+        {
+          "source_entity": "Author",
+          "target_entity": "this",
+          "relation_type": "create",
+          "is_directed": true
+        }
+      ]
+    },
+    {
+      "type": "User",
+      "nodes": [
+        {
+          "name": "Role",
+          "field_type": "drop-down"
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "this",
+          "target_entity": "Role",
+          "relation_type": "belongs_to",
+          "is_directed": false
+        }
+      ]
+    }
+  ]
+}
