@@ -2,6 +2,7 @@ package com.example.tutorial.plugins;
 
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.web.action.JiraWebActionSupport;
+import com.example.tutorial.plugins.offline.OfflineLoader;
 import org.apache.commons.lang.StringUtils;
 
 public class UserPropertyFormAction extends JiraWebActionSupport {
@@ -38,6 +39,7 @@ public class UserPropertyFormAction extends JiraWebActionSupport {
     @Override
     public String doDefault() throws Exception {
         System.out.println("BBBB" + user);
+
         return INPUT;
     }
 
@@ -45,6 +47,7 @@ public class UserPropertyFormAction extends JiraWebActionSupport {
     protected String doExecute() throws Exception {
         // Validate the form data
         System.out.println("BBBBAAAA" + user);
+        OfflineLoader.loadSomeIssue();
         if (StringUtils.isBlank(user) || StringUtils.isBlank(name) || StringUtils.isBlank(value)) {
             System.err.println("All fields are required.");
             return INPUT;
