@@ -2,6 +2,16 @@
   "entities": [
     {
       "type": "Issue",
+      "properties": [
+        {
+          "name": "BusinessInfo",
+          "field_type": "drop-down"
+        },
+        {
+          "name": "CreationDate",
+          "field_type": "Date"
+        }
+      ],
       "nodes": [
         {
           "name": "BusinessInfo",
@@ -43,6 +53,12 @@
         {
           "name": "Role",
           "field_type": "drop-down"
+        }
+      ],
+      "properties": [
+        {
+          "name": "CreationDate",
+          "field_type": "Date"
         }
       ],
       "relationships": [

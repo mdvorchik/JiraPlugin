@@ -96,45 +96,27 @@
             <scope>compile</scope>
         </dependency>
 
-<!--        зависимости для реста!!!!! при конфликте delete target - manifest-->
+<!--        зависимости active pbjects!!!!! при конфликте delete target - manifest-->
+        <dependency>
+            <groupId>com.atlassian.activeobjects</groupId>
+            <artifactId>activeobjects-plugin</artifactId>
+            <version>${ao.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.atlassian.jira</groupId>-->
-<!--            <artifactId>jira-rest-java-client-api</artifactId>-->
-<!--            <version>5.2.3</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.atlassian.jira</groupId>-->
-<!--            <artifactId>jira-rest-java-client-core</artifactId>-->
-<!--            <version>5.2.3</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.codehaus.jackson</groupId>-->
-<!--            <artifactId>jackson-core-asl</artifactId>-->
-<!--            <version>1.9.13</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.codehaus.jackson</groupId>-->
-<!--            <artifactId>jackson-mapper-asl</artifactId>-->
-<!--            <version>1.9.13</version>-->
-<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.atlassian.inject</groupId>-->
-<!--            <artifactId>atlassian-inject</artifactId>-->
-<!--            <version>0.1.1</version>-->
-<!--        </dependency>-->
 
-<!--        <dependency>-->
-<!--            <groupId>com.atlassian.plugins.rest</groupId>-->
-<!--            <artifactId>atlassian-rest-common</artifactId>-->
-<!--            <version>2.8.2</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.sun.xml.fastinfoset</groupId>-->
-<!--            <artifactId>FastInfoset</artifactId>-->
-<!--            <version>2.1.0</version>-->
-<!--        </dependency>-->
     </dependencies>
     <build>
         <plugins>
@@ -217,6 +199,7 @@
         <jira.version>7.7.1</jira.version>
         <amps.version>6.3.15</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
+        <ao.version>5.0.1</ao.version>
         <atlassian.spring.scanner.version>1.2.13</atlassian.spring.scanner.version>
         <!-- This key is used to keep the consistency between the key in atlassian-plugin.xml and the key to generate bundle. -->
         <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
