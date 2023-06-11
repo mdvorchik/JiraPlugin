@@ -9,6 +9,14 @@ public class Node {
     @JsonProperty("field_type")
     private String fieldType;
 
+    public Node() {
+    }
+
+    public Node(String name, String fieldType) {
+        this.name = name;
+        this.fieldType = fieldType;
+    }
+
     public String getName() {
         return name;
     }

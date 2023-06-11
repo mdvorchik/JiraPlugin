@@ -17,6 +17,16 @@ public class Entity {
     @JsonProperty("relationships")
     private List<Relationship> relationships;
 
+    public Entity() {
+    }
+
+    public Entity(String type, List<Property> properties, List<Node> nodes, List<Relationship> relationships) {
+        this.type = type;
+        this.properties = properties;
+        this.nodes = nodes;
+        this.relationships = relationships;
+    }
+
     public String getType() {
         return type;
     }

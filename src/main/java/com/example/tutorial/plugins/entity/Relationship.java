@@ -15,6 +15,16 @@ public class Relationship {
     @JsonProperty("is_directed")
     private Boolean isDirected;
 
+    public Relationship() {
+    }
+
+    public Relationship(String sourceEntity, String targetEntity, String relationType, Boolean isDirected) {
+        this.sourceEntity = sourceEntity;
+        this.targetEntity = targetEntity;
+        this.relationType = relationType;
+        this.isDirected = isDirected;
+    }
+
     public String getSourceEntity() {
         return sourceEntity;
     }

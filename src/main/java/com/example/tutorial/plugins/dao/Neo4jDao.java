@@ -1,85 +1,99 @@
 package com.example.tutorial.plugins.dao;
 
+import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.Issue;
-import com.example.tutorial.plugins.entity.Node;
-import com.example.tutorial.plugins.entity.Property;
-import com.example.tutorial.plugins.entity.Relationship;
-import com.example.tutorial.plugins.entity.Rule;
+import com.atlassian.jira.issue.fields.CustomField;
+import com.example.tutorial.plugins.entity.*;
 import org.neo4j.driver.*;
 
-import javax.transaction.Transaction;
-import java.sql.Driver;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Neo4jDao {
-    private Driver driver;
+    private final Driver driver;
 
+    public Neo4jDao(String uri, String username, String password) {
+        driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password));
+    }
 
-    public void insertIssueToDB(Issue issue, Rule rule) {
-        // 1) Получение всех стандартных полей из issue
-        String type = issue.ge();
-        List<Property> properties = issue.getProperties();
-        List<Node> nodes = issue.getNodes();
-        List<Relationship> relationships = issue.getRelationships();
-
-        // 2) Получение всех пользовательских полей, которые содержит правило
-        List<Property> ruleProperties = rule.getProperties();
-
+    public void replicateIssue(Issue jiraIssue, Entity config) {
         try (Session session = driver.session()) {
-            // Открываем транзакцию
-            try (Transaction tx = session.beginTransaction()) {
-                // 3) Репликация в базу данных Neo4j по правилу
-
-                // Добавление узлов
-                for (Node node : nodes) {
-                    String name = node.getName();
-                    String fieldType = node.getFieldType();
-
-                    String statement = String.format(
-                            "MERGE (n:%s {name: '%s', fieldType: '%s'})",
-                            type, name, fieldType);
-
-                    tx.run(statement);
-                }
-
-                // Добавление свойств
-                for (Property property : properties) {
-                    String name = property.getName();
-                    String fieldType = property.getFieldType();
-
-                    String statement = String.format(
-                            "MERGE (p:%s {name: '%s', fieldType: '%s'})",
-                            type, name, fieldType);
-
-                    tx.run(statement);
-                }
-
-                // Добавление отношений
-                for (Relationship relationship : relationships) {
-                    String sourceEntity = relationship.getSourceEntity();
-                    String targetEntity = relationship.getTargetEntity();
-                    String relationType = relationship.getRelationType();
-                    boolean isDirected = relationship.getIsDirected();
-
-                    String statement = String.format(
-                            "MATCH (a:%s),(b:%s) " +
-                                    "MERGE (a)-[r:%s]->(b)",
-                            sourceEntity, targetEntity, relationType);
-
-                    if (!isDirected) {
-                        statement = String.format(
-                                "MATCH (a:%s),(b:%s) " +
-                                        "MERGE (a)-[r:%s]-(b)",
-                                sourceEntity, targetEntity, relationType);
-                    }
-
-                    tx.run(statement);
-                }
-
-                // Подтверждение транзакции
-                tx.commit();
-            }
+            session.writeTransaction(tx -> executeQuery(jiraIssue, config, tx));
         }
     }
 
+    private Object executeQuery(Issue jiraIssue, Entity config, Transaction tx) {
+        String query = buildQuery(jiraIssue, config);
+        Map<String, Object> parameters = buildParameters(jiraIssue, config);
+        tx.run(query, parameters);
+        return null;
+    }
+
+    private String buildQuery(Issue jiraIssue, Entity config) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("MERGE (i:Issue {id: $issueId, key: $issueKey})");
+
+        for (Relationship relationship : config.getRelationships()) {
+            queryBuilder.append(buildRelationshipQuery(relationship));
+        }
+
+        for (Property property : config.getProperties()) {
+            queryBuilder.append(buildPropertyQuery(property));
+        }
+
+        return queryBuilder.toString();
+    }
+
+    private String buildRelationshipQuery(Relationship relationship) {
+        return String.format(" MERGE (n:%s {id: $%s, name: $%s}) MERGE (i)-[:%s]->(n)",
+                relationship.getSourceEntity(),
+                relationship.getSourceEntity(),
+                relationship.getTargetEntity(),
+                relationship.getRelationType());
+    }
+
+    private String buildPropertyQuery(Property property) {
+        return String.format(" SET i.%s = $%s", property.getName(), property.getName());
+    }
+
+    private Map<String, Object> buildParameters(Issue jiraIssue, Entity config) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("issueId", String.valueOf(jiraIssue.getId()));
+        parameters.put("issueKey", jiraIssue.getKey());
+
+        for (Node node : config.getNodes()) {
+            parameters.put(node.getName(), getFieldValue(jiraIssue, node.getName()));
+        }
+
+        for (Property property : config.getProperties()) {
+            parameters.put(property.getName(), getFieldValue(jiraIssue, property.getName()));
+        }
+
+        return parameters;
+    }
+
+    private Object getFieldValue(Issue jiraIssue, String fieldName) {
+        switch (fieldName) {
+            case "id":
+                return String.valueOf(jiraIssue.getId());
+            case "key":
+                return jiraIssue.getKey();
+            case "summary":
+                return jiraIssue.getSummary();
+            case "description":
+                return jiraIssue.getDescription();
+            case "status":
+                return jiraIssue.getStatus().getName();
+            case "issueType":
+                return jiraIssue.getIssueType().getName();
+            // Fetching a custom field value
+            case "customFieldName":
+                CustomField customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(fieldName);
+                return jiraIssue.getCustomFieldValue(customField);
+            // additional fields...
+            default:
+                throw new IllegalArgumentException("Unknown field: " + fieldName);
+        }
+    }
 }
+

@@ -8,6 +8,13 @@ public class Rule {
     @JsonProperty("entities")
     private List<Entity> entities;
 
+    public Rule() {
+    }
+
+    public Rule(List<Entity> entities) {
+        this.entities = entities;
+    }
+
     public List<Entity> getEntities() {
         return entities;
     }
