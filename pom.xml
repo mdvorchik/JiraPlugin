@@ -123,12 +123,19 @@
             <version>4.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
 <!--        test-->
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>org.neo4j.test</groupId>
             <artifactId>neo4j-harness</artifactId>
-            <version>4.0.0</version>
+            <version>3.5.14</version>
             <scope>test</scope>
         </dependency>
 

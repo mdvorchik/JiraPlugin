@@ -12,8 +12,8 @@ import java.util.Map;
 public class Neo4jDao {
     private final Driver driver;
 
-    public Neo4jDao(String uri, String username, String password) {
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password));
+    public Neo4jDao(Driver driver) {
+        this.driver = driver;
     }
 
     public void replicateIssue(Issue jiraIssue, Entity config) {
@@ -45,10 +45,12 @@ public class Neo4jDao {
     }
 
     private String buildRelationshipQuery(Relationship relationship) {
-        return String.format(" MERGE (n:%s {id: $%s, name: $%s}) MERGE (i)-[:%s]->(n)",
+        return String.format(" MERGE (n%s:%s {id: $%s, name: $%s}) MERGE (i)-[:%s]->(n%s)",
+                relationship.getRelationType(),
                 relationship.getSourceEntity(),
                 relationship.getSourceEntity(),
                 relationship.getTargetEntity(),
+                relationship.getRelationType(),
                 relationship.getRelationType());
     }
 
@@ -69,6 +71,12 @@ public class Neo4jDao {
             parameters.put(property.getName(), getFieldValue(jiraIssue, property.getName()));
         }
 
+        // Добавление параметров для источника и цели отношения.
+        for (Relationship relationship : config.getRelationships()) {
+            parameters.put(relationship.getSourceEntity(), relationship.getSourceEntity());
+            parameters.put(relationship.getTargetEntity(), relationship.getTargetEntity());
+        }
+
         return parameters;
     }
 
@@ -85,8 +93,12 @@ public class Neo4jDao {
             case "status":
                 return jiraIssue.getStatus().getName();
             case "issueType":
-                return jiraIssue.getIssueType().getName();
-            // Fetching a custom field value
+                if (jiraIssue.getIssueType() == null) {
+                    return "Default";
+                } else {
+                    return jiraIssue.getIssueType().getName();
+                }
+                // Fetching a custom field value
             case "customFieldName":
                 CustomField customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(fieldName);
                 return jiraIssue.getCustomFieldValue(customField);
