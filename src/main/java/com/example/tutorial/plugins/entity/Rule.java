@@ -6,20 +6,20 @@ import java.util.List;
 
 public class Rule {
     @JsonProperty("entities")
-    private List<Entity> entities;
+    private List<EntityV> entities;
 
     public Rule() {
     }
 
-    public Rule(List<Entity> entities) {
+    public Rule(List<EntityV> entities) {
         this.entities = entities;
     }
 
-    public List<Entity> getEntities() {
+    public List<EntityV> getEntities() {
         return entities;
     }
 
-    public void setEntities(List<Entity> entities) {
+    public void setEntities(List<EntityV> entities) {
         this.entities = entities;
     }
 }

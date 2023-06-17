@@ -1,7 +1,6 @@
 package com.example.tutorial.plugins.dao;
 
 import com.atlassian.jira.issue.Issue;
-import com.atlassian.jira.project.Project;
 import com.atlassian.jira.user.ApplicationUser;
 import com.example.tutorial.plugins.entity.*;
 import org.junit.After;
@@ -11,7 +10,7 @@ import org.mockito.Mockito;
 import org.neo4j.driver.*;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
-import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,82 +58,98 @@ public class Neo4jDaoTest {
         Neo4jDao dao = new Neo4jDao(driver);
 
         // Инициализация правила
-        Entity entity = new Entity();
-        entity.setType("Issue");
+        Rule rule = new Rule();
+        List<EntityV> entities = new ArrayList<>();
+        EntityV entityV = new EntityV();
+        entityV.setType("Issue");
 
-        List<Property> properties = new ArrayList<>();
-        properties.add(new Property("summary", "string"));
-        properties.add(new Property("description", "string"));
-        properties.add(new Property("issueType", "string"));
+        EntityV entityVUser = new EntityV();
+        entityVUser.setType("User");
+
+        List<PropertyV> properties = new ArrayList<>();
+        properties.add(new PropertyV("summary", "string"));
+        properties.add(new PropertyV("description", "string"));
+        properties.add(new PropertyV("issueType", "string"));
 //        properties.add(new Property("status", "string"));
 //        properties.add(new Property("priority", "string"));
 //        properties.add(new Property("creator", "User"));
 //        properties.add(new Property("assignee", "User"));
-        entity.setProperties(properties);
+        entityV.setProperties(properties);
 
-        List<Relationship> relationships = new ArrayList<>();
-        Relationship rel1 = new Relationship();
+        List<PropertyV> propertiesUser = new ArrayList<>();
+        propertiesUser.add(new PropertyV("id", "string"));
+        propertiesUser.add(new PropertyV("username", "string"));
+
+        List<RelationshipV> relationshipVS = new ArrayList<>();
+        RelationshipV rel1 = new RelationshipV();
         rel1.setSourceEntity("Issue");
         rel1.setTargetEntity("User");
         rel1.setRelationType("CREATED_BY");
         rel1.setDirected(true);
-        relationships.add(rel1);
+        relationshipVS.add(rel1);
 
-        Relationship rel2 = new Relationship();
+        RelationshipV rel2 = new RelationshipV();
         rel2.setSourceEntity("Issue");
         rel2.setTargetEntity("User");
         rel2.setRelationType("ASSIGNED_TO");
         rel2.setDirected(true);
-        relationships.add(rel2);
+        relationshipVS.add(rel2);
 
-        entity.setRelationships(relationships);
+        entityV.setRelationships(relationshipVS);
 
-        List<Node> nodes = new ArrayList<>();
-        entity.setNodes(nodes);
+        List<NodeV> nodeVS = new ArrayList<>();
+        entityV.setNodes(nodeVS);
+
+        entityVUser.setNodes(new ArrayList<>());
+        entityVUser.setProperties(propertiesUser);
+        entityVUser.setRelationships(new ArrayList<>());
         System.out.println("Complete entity");
 
         // Тестирование метода replicateIssue
+        entities.add(entityV);
+        entities.add(entityVUser);
+        System.out.println("Complete entity user4");
+        rule.setEntities(entities);
         for (Issue mockIssue : mockIssues) {
-            dao.replicateIssue(mockIssue, entity);
+            dao.replicateIssue(mockIssue, rule);
         }
 
         printAllData();
         System.out.println("/////////////");
         printAllRel();
 
-        // Проверка в базе данных
-//        try (Session session = driver.session()) {
-//            for (Issue mockIssue : mockIssues) {
-////                Result result = session.run("MATCH (n:Issue) WHERE n.id = $id",
-//                Result result = session.run("MATCH (n:Issue) WHERE n.id = $id RETURN n.summary AS summary, n.description AS description",
-//                        Values.parameters("id", String.valueOf(mockIssue.getId())));
-//                if (result.hasNext()) {
-//                    Record record = result.next();
-//                    assertEquals(mockIssue.getSummary(), record.get("summary").asString());
-//                    assertEquals(mockIssue.getDescription(), record.get("description").asString());
-//                } else {
-//                    throw new AssertionError("No data found in the database for issue " + mockIssue.getKey());
-//                }
-//            }
-//
-//            // Проверка связей между нодами
-//            Result result = session.run("MATCH (n:Issue)-[:CREATED_BY]->(m:User) RETURN count(*) AS count");
-//            if (result.hasNext()) {
-//                Record record = result.next();
-//                assertEquals(mockIssues.size(), record.get("count").asInt());
-//            } else {
-//                throw new AssertionError("No relationships found in the database");
-//            }
-//        }
+//         Проверка в базе данных
+        try (Session session = driver.session()) {
+            for (Issue mockIssue : mockIssues) {
+                Result result = session.run("MATCH (n:Issue) WHERE n.id = $id RETURN n.summary AS summary, n.description AS description",
+                        Values.parameters("id", String.valueOf(mockIssue.getId())));
+                if (result.hasNext()) {
+                    Record record = result.next();
+                    assertEquals(mockIssue.getSummary(), record.get("summary").asString());
+                    assertEquals(mockIssue.getDescription(), record.get("description").asString());
+                } else {
+                    throw new AssertionError("No data found in the database for issue " + mockIssue.getKey());
+                }
+            }
+
+            // Проверка связей между нодами
+            Result result = session.run("MATCH (n:Issue)-[:CREATED_BY]->(m:User) RETURN count(*) AS count");
+            if (result.hasNext()) {
+                Record record = result.next();
+                assertEquals(mockIssues.size(), record.get("count").asInt());
+            } else {
+                throw new AssertionError("No relationships found in the database");
+            }
+        }
     }
 
-//    @Test
+    //    @Test
     public void printAllData() {
         try (Session session = driver.session()) {
-            Result result = session.run("MATCH (n) RETURN n");
+            Result result = session.run("MATCH (n) RETURN labels(n) as labels, n");
             while (result.hasNext()) {
                 Record record = result.next();
-                System.out.println(record.get("n").asMap());
+                System.out.println("Labels: " + record.get("labels").asList() + " Node properties: " + record.get("n").asMap());
             }
         }
     }

@@ -50,24 +50,14 @@
     {
       "type": "User",
       "nodes": [
-        {
-          "name": "Role",
-          "field_type": "drop-down"
-        }
       ],
       "properties": [
         {
-          "name": "CreationDate",
-          "field_type": "Date"
+          "name": "username",
+          "field_type": "String"
         }
       ],
       "relationships": [
-        {
-          "source_entity": "this",
-          "target_entity": "Role",
-          "relation_type": "belongs_to",
-          "is_directed": false
-        }
       ]
     }
   ]

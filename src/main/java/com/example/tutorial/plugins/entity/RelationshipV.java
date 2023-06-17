@@ -2,7 +2,7 @@ package com.example.tutorial.plugins.entity;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Relationship {
+public class RelationshipV {
     @JsonProperty("source_entity")
     private String sourceEntity;
 
@@ -15,10 +15,10 @@ public class Relationship {
     @JsonProperty("is_directed")
     private Boolean isDirected;
 
-    public Relationship() {
+    public RelationshipV() {
     }
 
-    public Relationship(String sourceEntity, String targetEntity, String relationType, Boolean isDirected) {
+    public RelationshipV(String sourceEntity, String targetEntity, String relationType, Boolean isDirected) {
         this.sourceEntity = sourceEntity;
         this.targetEntity = targetEntity;
         this.relationType = relationType;

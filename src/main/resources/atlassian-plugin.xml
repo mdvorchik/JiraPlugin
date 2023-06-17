@@ -20,9 +20,9 @@
         </init-param>
     </servlet>
 
-    <servlet name="Property Servlet" i18n-name-key="property-servlet.name" key="property-servlet" class="com.example.tutorial.plugins.PropertyServlet">
-        <description key="property-servlet.description">The Property Servlet</description>
-        <url-pattern>/property</url-pattern>
+    <servlet name="Property Servlet" i18n-name-key="propertyV-servlet.name" key="propertyV-servlet" class="com.example.tutorial.plugins.PropertyServlet">
+        <description key="propertyV-servlet.description">The Property Servlet</description>
+        <url-pattern>/propertyV</url-pattern>
     </servlet>
 
     <web-item key="general-settings" name="User Properties Link" section="system.top.navigation.bar" weight="1000">
@@ -30,16 +30,16 @@
         <link>/secure/UserPropertiesAction!default.jspa</link>
     </web-item>
 
-    <web-item key="user-property-form-link" name="User Property Form Link" section="system.top.navigation.bar" weight="1000">
+    <web-item key="user-propertyV-form-link" name="User Property Form Link" section="system.top.navigation.bar" weight="1000">
         <label key="Neo4j creds"/>
         <link>/secure/UserPropertyFormAction!default.jspa</link>
     </web-item>
 
-    <webwork1 key="user-property-form" name="User Property Form" class="java.lang.Object">
+    <webwork1 key="user-propertyV-form" name="User Property Form" class="java.lang.Object">
         <actions>
             <action name="com.example.tutorial.plugins.UserPropertyFormAction" alias="UserPropertyFormAction">
-                <view name="input">/templates/user-property-form.vm</view>
-                <view name="success">/templates/user-property-form-success.vm</view>
+                <view name="input">/templates/user-propertyV-form.vm</view>
+                <view name="success">/templates/user-propertyV-form-success.vm</view>
             </action>
         </actions>
     </webwork1>
@@ -71,12 +71,12 @@
 
     <!--    <ao key="ao" name="Your Plugin Active Objects" schemaVersion="1">-->
 <!--        <description>The module configuring the Active Objects service</description>-->
-<!--        <entity name="UserProperty">-->
-<!--            <description>A UserProperty entity</description>-->
+<!--        <entityV name="UserProperty">-->
+<!--            <description>A UserProperty entityV</description>-->
 <!--            <attribute name="userName" type="string"/>-->
 <!--            <attribute name="propertyName" type="string"/>-->
 <!--            <attribute name="propertyValue" type="string"/>-->
-<!--        </entity>-->
+<!--        </entityV>-->
 <!--    </ao>-->
 
 

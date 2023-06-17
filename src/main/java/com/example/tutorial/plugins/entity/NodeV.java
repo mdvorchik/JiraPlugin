@@ -2,17 +2,17 @@ package com.example.tutorial.plugins.entity;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Node {
+public class NodeV {
     @JsonProperty("name")
     private String name;
 
     @JsonProperty("field_type")
     private String fieldType;
 
-    public Node() {
+    public NodeV() {
     }
 
-    public Node(String name, String fieldType) {
+    public NodeV(String name, String fieldType) {
         this.name = name;
         this.fieldType = fieldType;
     }
