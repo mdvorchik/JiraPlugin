@@ -113,7 +113,7 @@ public class Neo4jDaoTest {
         // Тестирование метода replicateIssue
         entities.add(entityV);
         entities.add(entityVUser);
-        System.out.println("Complete entity user12");
+        System.out.println("Complete entity user15");
         rule.setEntities(entities);
         for (Issue mockIssue : mockIssues) {
             dao.replicateIssue(mockIssue, rule);

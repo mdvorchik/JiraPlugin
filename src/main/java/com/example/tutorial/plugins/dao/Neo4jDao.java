@@ -36,7 +36,7 @@ public class Neo4jDao {
         typesToUsedIds.put(USER, new HashSet<>());
         typesToUsedIds.put(PROJECT, new HashSet<>());
         StatementBuilder builder =
-                new GraphDbService(configAll).processIssue((Issue) jiraObject, typesToUsedIds, null);
+                new GraphDbService(configAll).processIssue((Issue) jiraObject, typesToUsedIds, null, new HashMap<>(), "this");
         try (Session session = driver.session()) {
 //            session.writeTransaction(tx -> executeQuery(jiraObject, config, tx));
             session.writeTransaction(tx -> tx.run(builder.build().getCypher()));

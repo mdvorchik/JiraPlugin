@@ -25,16 +25,15 @@ public class GraphDbService {
         this.ruleMapping = ruleMapping;
     }
 
-    public StatementBuilder processIssue(Issue jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder) {
-        if (typesToUsedIds.get(ISSUE).contains(jiraIssue.getKey())) {
+    public StatementBuilder processIssue(Issue jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder, Map<String, Node> fieldNameToNode, String nodeName) {
+        if (typesToUsedIds.get(ISSUE).contains(jiraIssue.getKey() + ":" + nodeName)) {
             return builder;
         }
-        Map<String, Node> fieldNameToNode = new HashMap<>();
-        typesToUsedIds.get(ISSUE).add(jiraIssue.getKey());
+        typesToUsedIds.get(ISSUE).add(jiraIssue.getKey() + ":" + nodeName);
         EntityV ruleEntity = EntityDao.getIssueFromRule(ruleMapping);
 
         Node issueNode = Node.named(jiraIssue.getKey()).withLabel(ISSUE.getName());
-        fieldNameToNode.put("this", issueNode);
+        fieldNameToNode.put(nodeName, issueNode);
 
         issueNode = getNodeWithProperties(jiraIssue, ruleEntity, issueNode);
 
@@ -56,6 +55,7 @@ public class GraphDbService {
         for (RelationshipV relationship : ruleEntity.getRelationships()) {
             String relationType = relationship.getRelationType();
             String sourceEntity = relationship.getSourceEntity();
+            //todo getfieldvalue
             String targetEntity = relationship.getTargetEntity();
 
             Node sourceNode = fieldNameToNode.get(sourceEntity);
@@ -75,11 +75,11 @@ public class GraphDbService {
         for (NodeV nodeV : ruleEntity.getNodes()) {
             Object fieldValue = getFieldValue(jiraIssue, nodeV.getName());
             if (fieldValue instanceof ApplicationUser) {
-                builder = processUser((ApplicationUser) fieldValue, typesToUsedIds, builder);
+                builder = processUser((ApplicationUser) fieldValue, typesToUsedIds, builder, fieldNameToNode, nodeV.getName());
                 continue;
             }
             if (fieldValue instanceof Issue) {
-                builder = processIssue((Issue) fieldValue, typesToUsedIds, builder);
+                builder = processIssue((Issue) fieldValue, typesToUsedIds, builder, fieldNameToNode, nodeV.getName());
                 continue;
             }
             if (fieldValue instanceof Project) {
@@ -118,19 +118,18 @@ public class GraphDbService {
         return builder;
     }
 
-    private StatementBuilder processUser(ApplicationUser user, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder) {
-        if (typesToUsedIds.get(USER).contains(user.getKey())) {
+    private StatementBuilder processUser(ApplicationUser user, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder, Map<String, Node> fieldNameToNode, String nodeName) {
+        if (typesToUsedIds.get(USER).contains(user.getKey() + ":" + nodeName)) {
             return builder;
         }
-        Map<String, Node> fieldNameToNode = new HashMap<>();
-        typesToUsedIds.get(USER).add(user.getKey());
-        EntityV ruleEntity = EntityDao.getIssueFromRule(ruleMapping);
+        typesToUsedIds.get(USER).add(user.getKey() + ":" + nodeName);
+        EntityV ruleEntity = EntityDao.getUserFromRule(ruleMapping);
 
         Node issueNode = Node.named(user.getKey()).withLabel(USER.getName());
-        fieldNameToNode.put("this", issueNode);
-
 
         issueNode = getNodeWithProperties(user, ruleEntity, issueNode);
+
+        fieldNameToNode.put(nodeName, issueNode);
 
         builder = builder.merge(issueNode);
 
@@ -186,9 +185,9 @@ public class GraphDbService {
                     return jiraIssue.getIssueType().getName();
                 }
             case "creator":
-                return jiraIssue.getCreator().getName(); // или другой метод, возвращающий уникальное имя пользователя
+                return jiraIssue.getCreator(); // или другой метод, возвращающий уникальное имя пользователя
             case "assignee":
-                return jiraIssue.getAssignee().getName(); // или другой метод, возвращающий уникальное имя пользователя
+                return jiraIssue.getAssignee(); // или другой метод, возвращающий уникальное имя пользователя
             default:
                 CustomField customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObject(fieldName);
                 return jiraIssue.getCustomFieldValue(customField);
