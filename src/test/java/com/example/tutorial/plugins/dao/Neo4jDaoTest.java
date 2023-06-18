@@ -11,6 +11,8 @@ import org.neo4j.driver.*;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +47,8 @@ public class Neo4jDaoTest {
             when(mockIssue.getSummary()).thenReturn("Test Summary " + i);
             when(mockIssue.getDescription()).thenReturn("Test Description " + i);
             when(mockIssue.getId()).thenReturn((long) i);
+            when(mockIssue.getUpdated()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
+            when(mockIssue.getCreated()).thenReturn(Timestamp.valueOf(LocalDateTime.now()));
 
             when(mockIssue.getKey()).thenReturn("KEY-" + i);
             when(mockIssue.getCreator()).thenReturn(i % 2 == 0 ? user1 : user2);
@@ -73,6 +77,9 @@ public class Neo4jDaoTest {
         properties.add(new PropertyV("summary", "string"));
         properties.add(new PropertyV("description", "string"));
         properties.add(new PropertyV("issueType", "string"));
+        properties.add(new PropertyV("created", "string"));
+        properties.add(new PropertyV("updated", "string"));
+        properties.add(new PropertyV("key", "string"));
 //        properties.add(new Property("status", "string"));
 //        properties.add(new Property("priority", "string"));
 //        properties.add(new Property("creator", "User"));
@@ -98,10 +105,18 @@ public class Neo4jDaoTest {
         rel2.setDirected(true);
         relationshipVS.add(rel2);
 
+        RelationshipV rel3 = new RelationshipV();
+        rel3.setSourceEntity("this");
+        rel3.setTargetEntity("issueType");
+        rel3.setRelationType("BELONGS_TO");
+        rel3.setDirected(false);
+        relationshipVS.add(rel3);
+
         entityV.setRelationships(relationshipVS);
 
         List<NodeV> nodeVS = new ArrayList<>();
         nodeVS.add(new NodeV("assignee", "User"));
+        nodeVS.add(new NodeV("issueType", "string"));
         nodeVS.add(new NodeV("creator", "User"));
         entityV.setNodes(nodeVS);
 
@@ -126,8 +141,8 @@ public class Neo4jDaoTest {
 //         Проверка в базе данных
         try (Session session = driver.session()) {
             for (Issue mockIssue : mockIssues) {
-                Result result = session.run("MATCH (n:Issue) WHERE n.id = $id RETURN n.summary AS summary, n.description AS description",
-                        Values.parameters("id", String.valueOf(mockIssue.getId())));
+                Result result = session.run("MATCH (n:Issue) WHERE n.key = $key RETURN n.summary AS summary, n.description AS description",
+                        Values.parameters("key", mockIssue.getKey()));
                 if (result.hasNext()) {
                     Record record = result.next();
                     assertEquals(mockIssue.getSummary(), record.get("summary").asString());
@@ -151,13 +166,16 @@ public class Neo4jDaoTest {
     //    @Test
     public void printAllData() {
         try (Session session = driver.session()) {
-            Result result = session.run("MATCH (n) RETURN labels(n) as labels, n");
+            Result result = session.run("MATCH (n) RETURN labels(n) as labels, n, id(n) as id");
             while (result.hasNext()) {
                 Record record = result.next();
-                System.out.println("Labels: " + record.get("labels").asList() + " Node properties: " + record.get("n").asMap());
+                System.out.println("Labels: " + record.get("labels").asList() +
+                        " Node properties: " + record.get("n").asMap() +
+                        " Node id: " + record.get("id").asInt());
             }
         }
     }
+
 
     public void printAllRel() {
         try (Session session = driver.session()) {

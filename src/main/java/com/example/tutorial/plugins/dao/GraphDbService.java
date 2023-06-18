@@ -86,7 +86,10 @@ public class GraphDbService {
                 builder = processProject((Project) fieldValue, typesToUsedIds, builder);
                 continue;
             }
-            Node nodeFromRule = Node.named(fieldValue.toString()).withLabel(nodeV.getFieldType());
+            Node nodeFromRule = Node.named(fieldValue.toString()).withLabel(nodeV.getName());
+            Map<String, Object> props = new HashMap<>();
+            props.put("value", fieldValue.toString());
+            nodeFromRule.withProperties(props);
             fieldNameToNode.put(nodeV.getName(), nodeFromRule);
 
             // Add creation of nodeFromRule to StatementBuilder.OngoingMerge builder
