@@ -5,9 +5,12 @@ import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.user.ApplicationUser;
+import com.example.tutorial.plugins.dsl.Node;
+import com.example.tutorial.plugins.dsl.Relationship;
+import com.example.tutorial.plugins.dsl.Statement;
+import com.example.tutorial.plugins.dsl.StatementBuilder;
 import com.example.tutorial.plugins.entity.*;
 import com.example.tutorial.plugins.enums.StandardJiraTypes;
-import org.neo4j.cypherdsl.core.*;
 
 import java.util.*;
 import java.util.Set;
@@ -22,7 +25,7 @@ public class GraphDbService {
         this.ruleMapping = ruleMapping;
     }
 
-    public StatementBuilder.OngoingMerge processIssue(Issue jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder.OngoingMerge builder) {
+    public StatementBuilder processIssue(Issue jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder) {
         if (typesToUsedIds.get(ISSUE).contains(jiraIssue.getKey())) {
             return builder;
         }
@@ -30,13 +33,13 @@ public class GraphDbService {
         typesToUsedIds.get(ISSUE).add(jiraIssue.getKey());
         EntityV ruleEntity = EntityDao.getIssueFromRule(ruleMapping);
 
-        Node issueNode = Cypher.node(ISSUE.getName()).named(jiraIssue.getKey());
+        Node issueNode = Node.named(jiraIssue.getKey()).withLabel(ISSUE.getName());
         fieldNameToNode.put("this", issueNode);
 
         issueNode = getNodeWithProperties(jiraIssue, ruleEntity, issueNode);
 
         if (builder == null) {
-            builder = Cypher.merge(issueNode);
+            builder = StatementBuilder.create().merge(issueNode);
         }
 
         builder = createNodes(jiraIssue, typesToUsedIds, fieldNameToNode, ruleEntity, builder);
@@ -49,7 +52,7 @@ public class GraphDbService {
         return builder;
     }
 
-    private static StatementBuilder.OngoingMerge createRelates(Map<String, Node> fieldNameToNode, EntityV ruleEntity, StatementBuilder.OngoingMerge builder) {
+    private static StatementBuilder createRelates(Map<String, Node> fieldNameToNode, EntityV ruleEntity, StatementBuilder builder) {
         for (RelationshipV relationship : ruleEntity.getRelationships()) {
             String relationType = relationship.getRelationType();
             String sourceEntity = relationship.getSourceEntity();
@@ -68,7 +71,7 @@ public class GraphDbService {
         return builder;
     }
 
-    private StatementBuilder.OngoingMerge createNodes(Object jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, Map<String, Node> fieldNameToNode, EntityV ruleEntity, StatementBuilder.OngoingMerge builder) {
+    private StatementBuilder createNodes(Object jiraIssue, Map<StandardJiraTypes, Set<String>> typesToUsedIds, Map<String, Node> fieldNameToNode, EntityV ruleEntity, StatementBuilder builder) {
         for (NodeV nodeV : ruleEntity.getNodes()) {
             Object fieldValue = getFieldValue(jiraIssue, nodeV.getName());
             if (fieldValue instanceof ApplicationUser) {
@@ -83,7 +86,7 @@ public class GraphDbService {
                 builder = processProject((Project) fieldValue, typesToUsedIds, builder);
                 continue;
             }
-            Node nodeFromRule = Cypher.node(nodeV.getFieldType()).named(fieldValue.toString());
+            Node nodeFromRule = Node.named(fieldValue.toString()).withLabel(nodeV.getFieldType());
             fieldNameToNode.put(nodeV.getName(), nodeFromRule);
 
             // Add creation of nodeFromRule to StatementBuilder.OngoingMerge builder
@@ -93,7 +96,7 @@ public class GraphDbService {
     }
 
 
-    private StatementBuilder.OngoingMerge processProject(Project project, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder.OngoingMerge builder) {
+    private StatementBuilder processProject(Project project, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder) {
         if (typesToUsedIds.get(PROJECT).contains(project.getKey())) {
             return builder;
         }
@@ -101,7 +104,7 @@ public class GraphDbService {
         typesToUsedIds.get(PROJECT).add(project.getKey());
         EntityV ruleEntity = EntityDao.getProjectFromRule(ruleMapping);
 
-        Node issueNode = Cypher.node(PROJECT.getName()).named(project.getKey());
+        Node issueNode = Node.named(project.getKey()).withLabel(PROJECT.getName());
         fieldNameToNode.put("this", issueNode);
 
         issueNode = getNodeWithProperties(project, ruleEntity, issueNode);
@@ -115,7 +118,7 @@ public class GraphDbService {
         return builder;
     }
 
-    private StatementBuilder.OngoingMerge processUser(ApplicationUser user, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder.OngoingMerge builder) {
+    private StatementBuilder processUser(ApplicationUser user, Map<StandardJiraTypes, Set<String>> typesToUsedIds, StatementBuilder builder) {
         if (typesToUsedIds.get(USER).contains(user.getKey())) {
             return builder;
         }
@@ -123,7 +126,7 @@ public class GraphDbService {
         typesToUsedIds.get(USER).add(user.getKey());
         EntityV ruleEntity = EntityDao.getIssueFromRule(ruleMapping);
 
-        Node issueNode = Cypher.node(USER.getName()).named(user.getKey());
+        Node issueNode = Node.named(user.getKey()).withLabel(USER.getName());
         fieldNameToNode.put("this", issueNode);
 
 
@@ -142,7 +145,7 @@ public class GraphDbService {
         Map<String, Object> properties = new HashMap<>();
         for (PropertyV property : ruleEntity.getProperties()) {
             Object fieldValue = getFieldValue(jiraIssue, property.getName());
-            properties.put(property.getName(), Cypher.literalOf(fieldValue.toString()));
+            properties.put(property.getName(), fieldValue.toString());
         }
         return issueNode.withProperties(properties);
     }
@@ -183,9 +186,9 @@ public class GraphDbService {
                     return jiraIssue.getIssueType().getName();
                 }
             case "creator":
-                return jiraIssue.getCreator().getUsername(); // или другой метод, возвращающий уникальное имя пользователя
+                return jiraIssue.getCreator().getName(); // или другой метод, возвращающий уникальное имя пользователя
             case "assignee":
-                return jiraIssue.getAssignee().getUsername(); // или другой метод, возвращающий уникальное имя пользователя
+                return jiraIssue.getAssignee().getName(); // или другой метод, возвращающий уникальное имя пользователя
             default:
                 CustomField customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObject(fieldName);
                 return jiraIssue.getCustomFieldValue(customField);
@@ -195,9 +198,9 @@ public class GraphDbService {
     private Object getUserFieldValue(ApplicationUser jiraUser, String fieldName) {
         switch (fieldName) {
             case "id":
-                return String.valueOf(jiraUser.getId());
+                return String.valueOf(jiraUser.getKey());
             case "username":
-                return jiraUser.getUsername();
+                return jiraUser.getName();
             // обработка других полей пользователя...
             default:
                 throw new IllegalArgumentException("Unknown field: " + fieldName);

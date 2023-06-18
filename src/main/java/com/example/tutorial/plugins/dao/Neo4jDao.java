@@ -4,12 +4,12 @@ import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.user.ApplicationUser;
+import com.example.tutorial.plugins.dsl.StatementBuilder;
 import com.example.tutorial.plugins.entity.EntityV;
 import com.example.tutorial.plugins.entity.PropertyV;
 import com.example.tutorial.plugins.entity.RelationshipV;
 import com.example.tutorial.plugins.entity.Rule;
 import com.example.tutorial.plugins.enums.StandardJiraTypes;
-import org.neo4j.cypherdsl.core.StatementBuilder;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Transaction;
@@ -35,7 +35,7 @@ public class Neo4jDao {
         typesToUsedIds.put(ISSUE, new HashSet<>());
         typesToUsedIds.put(USER, new HashSet<>());
         typesToUsedIds.put(PROJECT, new HashSet<>());
-        StatementBuilder.OngoingMerge builder =
+        StatementBuilder builder =
                 new GraphDbService(configAll).processIssue((Issue) jiraObject, typesToUsedIds, null);
         try (Session session = driver.session()) {
 //            session.writeTransaction(tx -> executeQuery(jiraObject, config, tx));

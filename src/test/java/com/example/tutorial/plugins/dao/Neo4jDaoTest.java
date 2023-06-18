@@ -34,9 +34,11 @@ public class Neo4jDaoTest {
         List<Issue> issues = new ArrayList<>();
         ApplicationUser user1 = Mockito.mock(ApplicationUser.class);
         when(user1.getName()).thenReturn("User1");
+        when(user1.getKey()).thenReturn("User1-1");
 
         ApplicationUser user2 = Mockito.mock(ApplicationUser.class);
         when(user2.getName()).thenReturn("User2");
+        when(user2.getKey()).thenReturn("User2-2");
 
         for (int i = 1; i <= 3; i++) {
             Issue mockIssue = Mockito.mock(Issue.class);
@@ -46,6 +48,7 @@ public class Neo4jDaoTest {
 
             when(mockIssue.getKey()).thenReturn("KEY-" + i);
             when(mockIssue.getCreator()).thenReturn(i % 2 == 0 ? user1 : user2);
+            when(mockIssue.getAssignee()).thenReturn(i % 2 == 0 ? user1 : user2);
 
             issues.add(mockIssue);
         }
@@ -82,15 +85,15 @@ public class Neo4jDaoTest {
 
         List<RelationshipV> relationshipVS = new ArrayList<>();
         RelationshipV rel1 = new RelationshipV();
-        rel1.setSourceEntity("Issue");
-        rel1.setTargetEntity("User");
+        rel1.setSourceEntity("this");
+        rel1.setTargetEntity("creator");
         rel1.setRelationType("CREATED_BY");
         rel1.setDirected(true);
         relationshipVS.add(rel1);
 
         RelationshipV rel2 = new RelationshipV();
-        rel2.setSourceEntity("Issue");
-        rel2.setTargetEntity("User");
+        rel2.setSourceEntity("this");
+        rel2.setTargetEntity("assignee");
         rel2.setRelationType("ASSIGNED_TO");
         rel2.setDirected(true);
         relationshipVS.add(rel2);
@@ -98,6 +101,8 @@ public class Neo4jDaoTest {
         entityV.setRelationships(relationshipVS);
 
         List<NodeV> nodeVS = new ArrayList<>();
+        nodeVS.add(new NodeV("assignee", "User"));
+        nodeVS.add(new NodeV("creator", "User"));
         entityV.setNodes(nodeVS);
 
         entityVUser.setNodes(new ArrayList<>());
@@ -108,7 +113,7 @@ public class Neo4jDaoTest {
         // Тестирование метода replicateIssue
         entities.add(entityV);
         entities.add(entityVUser);
-        System.out.println("Complete entity user4");
+        System.out.println("Complete entity user12");
         rule.setEntities(entities);
         for (Issue mockIssue : mockIssues) {
             dao.replicateIssue(mockIssue, rule);
