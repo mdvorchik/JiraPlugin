@@ -45,10 +45,17 @@ public class StatementBuilder {
         }
 
         for (Relationship relationship : relationships) {
+            boolean isDirected = relationship.isDirected();
             builder.append("MERGE (`").append(relationship.getFrom().getName()).append("`)");
             builder.append("-[:").append(relationship.getType()).append("]->");
             builder.append("(`").append(relationship.getTo().getName()).append("`) ");
+            if (!isDirected) {
+                builder.append("MERGE (`").append(relationship.getTo().getName()).append("`)");
+                builder.append("-[:").append(relationship.getType()).append("]->");
+                builder.append("(`").append(relationship.getFrom().getName()).append("`) ");
+            }
         }
+
 
         return new Statement(builder.toString());
     }

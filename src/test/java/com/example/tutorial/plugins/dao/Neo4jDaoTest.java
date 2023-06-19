@@ -190,6 +190,7 @@ public class Neo4jDaoTest {
         }
     }
 
+
     @After
     public void closeNeo4j() {
         this.embeddedDatabaseServer.close();

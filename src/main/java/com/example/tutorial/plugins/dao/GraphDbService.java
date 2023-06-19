@@ -5,12 +5,15 @@ import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.user.ApplicationUser;
+import com.example.tutorial.plugins.IssueCreatedResolvedListener;
 import com.example.tutorial.plugins.dsl.Node;
 import com.example.tutorial.plugins.dsl.Relationship;
 import com.example.tutorial.plugins.dsl.Statement;
 import com.example.tutorial.plugins.dsl.StatementBuilder;
 import com.example.tutorial.plugins.entity.*;
 import com.example.tutorial.plugins.enums.StandardJiraTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Set;
@@ -18,6 +21,7 @@ import java.util.Set;
 import static com.example.tutorial.plugins.enums.StandardJiraTypes.*;
 
 public class GraphDbService {
+    private static final Logger log = LoggerFactory.getLogger(GraphDbService.class);
 
     private final Rule ruleMapping;
 
@@ -146,13 +150,17 @@ public class GraphDbService {
     private Node getNodeWithProperties(Object jiraIssue, EntityV ruleEntity, Node issueNode) {
         Map<String, Object> properties = new HashMap<>();
         for (PropertyV property : ruleEntity.getProperties()) {
+            log.info("1001 getNodeWithProperties: property.getName() - " + property.getName());
             Object fieldValue = getFieldValue(jiraIssue, property.getName());
+            log.info("1001 getNodeWithProperties: fieldValue.toString() - " + fieldValue.toString());
             properties.put(property.getName(), fieldValue.toString());
         }
         return issueNode.withProperties(properties);
     }
 
     private Object getFieldValue(Object jiraObject, String fieldName) {
+        log.info("1000 getFieldValue: fieldName - " + fieldName);
+        log.info("1000 getFieldValue: jiraObjectType - " + jiraObject.getClass());
         if (jiraObject instanceof Issue) {
             return getIssueFieldValue((Issue) jiraObject, fieldName);
         } else if (jiraObject instanceof ApplicationUser) {
@@ -187,6 +195,8 @@ public class GraphDbService {
                 } else {
                     return jiraIssue.getIssueType().getName();
                 }
+            case "reporter":
+                return jiraIssue.getReporter(); // или другой метод, возвращающий уникальное имя пользователя
             case "creator":
                 return jiraIssue.getCreator(); // или другой метод, возвращающий уникальное имя пользователя
             case "assignee":

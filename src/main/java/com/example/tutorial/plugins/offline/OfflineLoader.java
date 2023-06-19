@@ -23,6 +23,10 @@ public class OfflineLoader {
         SearchService.ParseResult parseResult = searchService.parseQuery(user, jql);
 
         if (parseResult.isValid()) {
+            Query query = parseResult.getQuery();
+            // Get total count of issues without loading them
+            long totalIssueCount = searchService.searchCount(user, query);
+            System.out.println("Total count of issues: " + totalIssueCount);
             int startAt = 0;
             int pageSize = 100; // Set your desired page size
             PagerFilter pagerFilter;
@@ -30,6 +34,7 @@ public class OfflineLoader {
             while (true) {
                 pagerFilter = PagerFilter.newPageAlignedFilter(startAt, pageSize);
                 SearchResults searchResults = searchService.search(user, parseResult.getQuery(), pagerFilter);
+                //todo get all issues count without pageSize limit, i dont want load all issues, but i want know there total count
                 System.out.println("Total: " + searchResults.getTotal());
 
                 if (searchResults.getIssues().size() == 0) {
