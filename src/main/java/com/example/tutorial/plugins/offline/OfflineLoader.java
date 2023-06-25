@@ -9,11 +9,15 @@ import com.atlassian.jira.jql.parser.JqlQueryParser;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.query.Query;
+import com.example.tutorial.plugins.configurer.ConnectionConfig;
+import com.example.tutorial.plugins.dao.Neo4jDao;
+import com.example.tutorial.plugins.entity.Rule;
 
 public class OfflineLoader {
 
-    public static void loadSomeIssue() throws Exception {
-        String jql = "project = BEBE ORDER BY created ASC";
+    public static void loadSomeIssue(String jql) throws Exception {
+        Neo4jDao neo4jDao = ConnectionConfig.getNeo4jDao();
+        Rule rule = ConnectionConfig.getRule();
         JqlQueryParser jqlQueryParser = ComponentAccessor.getComponent(JqlQueryParser.class);
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
 
@@ -42,12 +46,13 @@ public class OfflineLoader {
                 }
 
                 for (Issue issue : searchResults.getIssues()) {
-                    System.out.println("Issue key: " + issue.getKey());
-
-                    // Here we'll check if issue's key equals "MYP-7" and print its "BusinessProcess" field value
-                    if (issue.getKey().equals("MYP-7")) {
-                        System.out.println("Field Value: " + issue.getCustomFieldValue(ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName("BusinessProcess")));
-                    }
+                    neo4jDao.replicateIssue(issue, rule);
+//                    System.out.println("Issue key: " + issue.getKey());
+//
+//                    // Here we'll check if issue's key equals "MYP-7" and print its "BusinessProcess" field value
+//                    if (issue.getKey().equals("MYP-7")) {
+//                        System.out.println("Field Value: " + issue.getCustomFieldValue(ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName("BusinessProcess")));
+//                    }
                 }
 
                 startAt += pageSize;

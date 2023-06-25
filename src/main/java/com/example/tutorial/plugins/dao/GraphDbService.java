@@ -5,7 +5,6 @@ import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.user.ApplicationUser;
-import com.example.tutorial.plugins.IssueCreatedResolvedListener;
 import com.example.tutorial.plugins.dsl.Node;
 import com.example.tutorial.plugins.dsl.Relationship;
 import com.example.tutorial.plugins.dsl.Statement;

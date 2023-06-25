@@ -1,0 +1,4 @@
+sudo ss -lptn 'sport = :5432'    // get all busy ports
+kill <pid>
+
+project = TEST ORDER BY created ASC

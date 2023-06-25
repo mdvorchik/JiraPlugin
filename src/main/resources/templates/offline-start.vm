@@ -1,0 +1,13 @@
+#controlHeader ($action $helper)
+<h1>Start offline load</h1>
+
+<form class="aui" action="$req.contextPath/secure/StartOfflineAction.jspa" method="post">
+    <div class="field-group">
+        <label for="info">JQL</label>
+        <input type="text" id="info" name="info" style="resize:none; width: 50%; height: 30px; white-space: pre-wrap;"/>
+    </div>
+    <div class="buttons-container">
+        <input class="button" type="submit" value="Update Schema"/>
+    </div>
+</form>
+#controlFooter ($action $helper)

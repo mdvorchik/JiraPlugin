@@ -47,7 +47,7 @@ public class UserPropertyFormAction extends JiraWebActionSupport {
     protected String doExecute() throws Exception {
         // Validate the form data
         System.out.println("BBBBAAAA" + user);
-        OfflineLoader.loadSomeIssue();
+//        OfflineLoader.loadSomeIssue();
         if (StringUtils.isBlank(user) || StringUtils.isBlank(name) || StringUtils.isBlank(value)) {
             System.err.println("All fields are required.");
             return INPUT;
